@@ -7,7 +7,8 @@ int gohan = 0;
 BufferedSerial pc(USBTX, USBRX, 250000); // パソコンとのシリアル通信
 Timer timer;
 CAN can(PA_11, PA_12, (int)1e6);
-FirstPenguin penguin{can_id, can};
+CAN can1(PB_12, PB_13, (int)1e6);
+FirstPenguin penguin{can_id, can1};
 uint8_t DATA[8] = {};
 
 void readUntilPipe(char *output_buf, int output_buf_size)
@@ -45,8 +46,10 @@ void can_send()
 {
     while (1)
     {
-        DATA[0] = gohan >> 8; // ビッグエンディアン形式
-        DATA[1] = gohan & 0xFF;
+        DATA[0] = suuti >> 8; // ビッグエンディアン形式
+        DATA[1] = suuti & 0xFF;
+        DATA[2] = -suuti >> 8; // ビッグエンディアン形式
+        DATA[3] = -suuti & 0xFF;
         CANMessage msg0(0x200, DATA, 8);
         can.write(msg0);
         penguin.send();
@@ -83,12 +86,12 @@ int main()
             printf("triangle\n");
         }
         else if(strncmp(output_buf, "right", 2) == 0){
-            gohan = 200;
+            gohan = 3000;
             printf("right\n");
         }
         else if (strncmp(output_buf, "left", 4) == 0)
         {
-            gohan = -200;
+            gohan = -3000;
             printf("left\n");
         }
         else if(strncmp(output_buf, "un_arrow", 8) == 0){
