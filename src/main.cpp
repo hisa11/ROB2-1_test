@@ -95,8 +95,6 @@ int main()
             gohan = 0;
             printf("un_arrow\n");
         }
-        
-        
 
         penguin.pwm[0] = gohan;
         penguin.pwm[1] = gohan;
