@@ -4,6 +4,7 @@
 constexpr uint32_t can_id = 35;
 int suuti = 0;
 int gohan = 0;
+int tarn = 0;
 BufferedSerial pc(USBTX, USBRX, 250000); // パソコンとのシリアル通信
 Timer timer;
 CAN can(PA_11, PA_12, (int)1e6);
@@ -46,15 +47,15 @@ void can_send()
 {
     while (1)
     {
-        DATA[0] = suuti >> 8; // ビッグエンディアン形式
-        DATA[1] = suuti & 0xFF;
-        DATA[2] = -suuti >> 8; // ビッグエンディアン形式
-        DATA[3] = -suuti & 0xFF;
+        DATA[0] = suuti + tarn >> 8; // ビッグエンディアン形式
+        DATA[1] = suuti + tarn & 0xFF;
+        DATA[2] = -suuti + tarn >> 8; // ビッグエンディアン形式
+        DATA[3] = -suuti + tarn & 0xFF;
         CANMessage msg0(0x200, DATA, 8);
         can.write(msg0);
         penguin.send();
         // printf("pwm[2]: %d\n", penguin.pwm[2]);
-        ThisThread::sleep_for(100ms); // 100ms待機
+        ThisThread::sleep_for(10ms); // 100ms待機
     }
 }
 
@@ -85,7 +86,8 @@ int main()
             suuti = 2000;
             printf("triangle\n");
         }
-        else if(strncmp(output_buf, "right", 2) == 0){
+        else if (strncmp(output_buf, "right", 2) == 0)
+        {
             gohan = 3000;
             printf("right\n");
         }
@@ -94,14 +96,31 @@ int main()
             gohan = -3000;
             printf("left\n");
         }
-        else if(strncmp(output_buf, "un_arrow", 8) == 0){
+        else if (strncmp(output_buf, "un_arrow", 8) == 0)
+        {
             gohan = 0;
             printf("un_arrow\n");
         }
+        else if (strncmp(output_buf, "R1", 2) == 0)
+        {
+            tarn = 1000;
+            printf("R1\n");
+        }
+        else if (strncmp(output_buf, "un_R1", 5) == 0 or strncmp(output_buf, "un_L1", 5) == 0)
+        {
+            tarn = 0;
+            printf("un_R1\n");
+        }
+        else if (strncmp(output_buf, "L1", 2) == 0)
+        {
+            tarn = -1000;
+            printf("L1\n");
+        }
 
-        penguin.pwm[0] = gohan;
-        penguin.pwm[1] = gohan;
-        penguin.pwm[2] = gohan;
-        penguin.pwm[3] = gohan;
+        penguin.pwm[0] = -gohan;
+        penguin.pwm[1] = -gohan;
+        penguin.pwm[2] = -gohan;
+        penguin.pwm[3] = -gohan;
+        printf("%d\n", suuti + tarn); // 修正された行
     }
 }
